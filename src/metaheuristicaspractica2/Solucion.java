@@ -76,6 +76,18 @@ public class Solucion {
         return coste;
     }
     
+    public int getValorPermutacion(int index){
+        return permutacion[index];
+    }
+    
+    public void setValorPermutacion(int index, int valor){
+         permutacion[index] = valor;
+    }
+    
+    public int getTam(){
+        return tam;
+    }
+    
     public void MostrarSolucion(){
         System.out.printf("Solucion = ");
         for(int i=0; i<tam; i++){
