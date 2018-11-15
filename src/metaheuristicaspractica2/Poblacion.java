@@ -36,7 +36,7 @@ public class Poblacion {
     }
     
     
-    public static void mergesort(int A[],int izq, int der){
+    public void mergesort(int A[],int izq, int der){
         if (izq<der){
                 int m=(izq+der)/2;
                 mergesort(A,izq, m);
@@ -45,7 +45,7 @@ public class Poblacion {
         }
     }
         
-   public static void merge(int A[],int izq, int m, int der){
+   public void merge(int A[],int izq, int m, int der){
    int i, j, k;
    int [] B = new int[A.length]; //array auxiliar
    for (i=izq; i<=der; i++) //copia ambas mitades en el array auxiliar
