@@ -53,5 +53,13 @@ public class AGEstacionario {
     private void Reemplazamiento(Solucion[] padres){
         
     }
+
+    public void Cruce(){
     
+    }
+
+    private void Mutacion() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    
+}
 }
