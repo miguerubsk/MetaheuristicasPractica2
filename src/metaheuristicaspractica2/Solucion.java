@@ -27,8 +27,7 @@ public class Solucion {
         coste = 0;
     }
     
-    public void GenerarAleatoria(int semilla){
-        Random rand = new Random(semilla);
+    public void GenerarAleatoria(Random rand){
         boolean adjudicado[] = new boolean[tam];
         for(int i=0; i<tam; i++){
             adjudicado[i] = false;
