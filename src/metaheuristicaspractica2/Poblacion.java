@@ -5,6 +5,8 @@
  */
 package metaheuristicaspractica2;
 
+import java.util.Random;
+
 /**
  *
  * @author Miguel Gonzalez Garcia y Roberto Martinez Fernandez
@@ -19,9 +21,10 @@ public class Poblacion {
         tam = _tam;
         individuos = new Solucion[tam];
         semilla = _semilla;
+        Random rand = new Random(semilla);
         for(int i=0; i<tam; i++){
             individuos[i] = new Solucion(prob);
-            individuos[i].GenerarAleatoria(semilla);
+            individuos[i].GenerarAleatoria(rand);
         }
     }
     
@@ -29,12 +32,33 @@ public class Poblacion {
         return individuos[index];
     }
     
-
+    //Reemplaza al individuo en la posicion "index" y devuelve el individuo reemplazado.
+    public void reemplazarIndividuo(Solucion individuo, int index){
+        individuos[index] = individuo;
+    }
     
     public int getTam(){
         return tam;
     }
     
+    public void ordenarPoblacion(){
+        burbuja();
+    }
+    
+    private void burbuja(){
+    boolean fin=false;
+        while(!fin){
+            fin=true;
+            for(int i=1; i<tam; i++){
+                if(individuos[i-1].getCoste()>individuos[i].getCoste()){
+                    Solucion aux = individuos[i-1];
+                    individuos[i-1] = individuos[i];
+                    individuos[i] = aux;
+                    fin = false;
+                }
+            }
+        }
+}
     
     public void mergesort(int A[],int izq, int der){
         if (izq<der){

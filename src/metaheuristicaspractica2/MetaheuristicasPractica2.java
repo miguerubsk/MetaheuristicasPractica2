@@ -36,11 +36,22 @@ public class MetaheuristicasPractica2 {
             int sem = Integer.parseInt(linea[1]);
             Poblacion poblacion = new Poblacion(TAM_POBLACION, sem, problema);
             
+            poblacion.ordenarPoblacion();
+            
             problema.MostrarDatos();
             for(int i=0; i<TAM_POBLACION; i++){
                 poblacion.individuo(i).MostrarSolucion();
             }
             
+            s = datos.readLine();
+            linea = s.split(" "); //Se obtiene la Semilla
+            String opCruce = linea[1];
+            AGEstacionario age = new AGEstacionario(poblacion, sem, opCruce, problema);
+            age.Ejecutar();
+            
+            for(int i=0; i<TAM_POBLACION; i++){
+                age.individuo(i).MostrarSolucion();
+            }
         }catch(Exception e){
             System.err.printf(e.getMessage()+"\n");
         }
