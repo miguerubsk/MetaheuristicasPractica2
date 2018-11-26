@@ -29,7 +29,8 @@ public class MetaheuristicasPractica2 {
             
             s = datos.readLine();
             String[] linea = s.split(" "); //Se obtiene la ruta al Fichero de Datos
-            Problema problema = new Problema(linea[1]);
+            String rutaDatos = linea[1];
+            Problema problema = new Problema(rutaDatos);
             
             s = datos.readLine();
             linea = s.split(" "); //Se obtiene la Semilla
@@ -46,7 +47,7 @@ public class MetaheuristicasPractica2 {
             s = datos.readLine();
             linea = s.split(" "); //Se obtiene la Semilla
             String opCruce = linea[1];
-            AGEstacionario age = new AGEstacionario(poblacion, sem, opCruce, problema);
+            AGEstacionario age = new AGEstacionario(poblacion, sem, opCruce, problema, rutaDatos);
             age.Ejecutar();
             
             for(int i=0; i<TAM_POBLACION; i++){
