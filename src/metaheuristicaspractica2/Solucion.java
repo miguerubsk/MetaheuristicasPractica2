@@ -80,7 +80,16 @@ public class Solucion {
     }
     
     public void setValorPermutacion(int index, int valor){
-         permutacion[index] = valor;
+        permutacion[index] = valor;
+    }
+    
+    public int getIndex(int valor){
+        for(int i=0; i<tam; i++){
+            if(permutacion[i] == valor){
+                return i;
+            }
+        }
+        return -1;
     }
     
     public int getTam(){
