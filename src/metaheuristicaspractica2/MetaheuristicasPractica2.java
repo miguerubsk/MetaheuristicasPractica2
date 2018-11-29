@@ -39,7 +39,7 @@ public class MetaheuristicasPractica2 {
             
             poblacion.ordenarPoblacion();
             
-            problema.MostrarDatos();
+            //problema.MostrarDatos();
             for(int i=0; i<TAM_POBLACION; i++){
                 poblacion.individuo(i).MostrarSolucion();
             }
@@ -47,11 +47,15 @@ public class MetaheuristicasPractica2 {
             s = datos.readLine();
             linea = s.split(" "); //Se obtiene la Semilla
             String opCruce = linea[1];
-            AGEstacionario age = new AGEstacionario(poblacion, sem, opCruce, problema, rutaDatos);
-            age.Ejecutar();
+//            AGEstacionario age = new AGEstacionario(poblacion, sem, opCruce, problema, rutaDatos);
+//            age.Ejecutar();
+
+            AGGeneracional agg = new AGGeneracional(poblacion, sem, opCruce, problema, rutaDatos);
+            agg.Ejecutar();
             
             for(int i=0; i<TAM_POBLACION; i++){
-                age.individuo(i).MostrarSolucion();
+//                age.individuo(i).MostrarSolucion();
+                agg.individuo(i).MostrarSolucion();
             }
         }catch(Exception e){
             System.err.printf(e.getMessage()+"\n");

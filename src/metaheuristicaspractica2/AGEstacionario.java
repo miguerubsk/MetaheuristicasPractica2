@@ -16,6 +16,7 @@ import java.util.Random;
 public class AGEstacionario {
 
     static final int MAX_EVALUACIONES = 50000;
+    static final int MAX_GENERACIONES = 50000;
 
     private Poblacion poblacion;
     private Random rand;
@@ -38,11 +39,11 @@ public class AGEstacionario {
             padres[i] = new Solucion(prob);
             hijos[i] = new Solucion(prob);
         }
-        rutaLog = rutaDatos + "_Estacionario_" + operadorCruce + ".log";
+        rutaLog = rutaDatos + "_Estacionario_" + operadorCruce + "_" + sem + ".log";
     }
 
     public void Ejecutar() {
-        while (numEvaluaciones < MAX_EVALUACIONES && numGeneracion < 50000) {
+        while (numEvaluaciones < MAX_EVALUACIONES && numGeneracion < MAX_GENERACIONES) {
             Seleccion();
             Cruce();
             Mutacion();
@@ -70,6 +71,7 @@ public class AGEstacionario {
                 padres[i] = poblacion.individuo(val[1]);
                 seleccionado = val[1];
             }
+            System.out.println("Seleccionado: "+seleccionado+"\n");
         }
     }
 
@@ -100,193 +102,93 @@ public class AGEstacionario {
 
     }
 
-    private void operadorOX(int corte1, int corte2) {
-        int iteradorHijo = 0, iteradorPadre = 0;
-        int[] dlb = new int[padres[0].getTam()];
-        for (int j = 0; j < 2; j++) {
-            System.out.print("Padre" + j + ": ");
-            for (int i = 0; i < padres[0].getTam(); i++) {
-                System.out.print(" " + padres[j].getValorPermutacion(i));
-            }
-            System.out.println();
-        }
-        for (int j = 0; j < 2; j++) {
-            iteradorHijo = corte2;
-            iteradorPadre = corte2;
-            for (int i = 0; i < dlb.length; i++) {
-                dlb[i] = 0;
-            }
-            for (int i = corte1; i < corte2; i++) {
-                hijos[j].setValorPermutacion(i, padres[j].getValorPermutacion(i));
-                dlb[padres[j].getValorPermutacion(i)] = 1;
-//                cont++;
-            }
-            System.out.printf("GENERACION: " + numGeneracion + "\nHijo " + j + ": ");
-            for (int i = 0; i < poblacion.individuo(0).getTam(); i++) {
-                System.out.printf(" " + hijos[j].getValorPermutacion(i));
-            }
-            while (iteradorHijo != corte1) {
-                        System.out.print("Hijo: "+ iteradorHijo + "Padre: "+iteradorPadre+"DLB:");
-                    for(int i=0; i<dlb.length; i++){
-                       System.out.printf(" "+dlb[i]);
-                    }
-            System.out.println();
-//            System.out.print(padres[(j + 1) % 2].getValorPermutacion(iteradorPadre));
-                if (dlb[padres[(j + 1) % 2].getValorPermutacion(iteradorPadre)] == 0) {
-                    hijos[j].setValorPermutacion(iteradorHijo, padres[(j + 1) % 2].getValorPermutacion(iteradorPadre));
-                    dlb[padres[(j + 1) % 2].getValorPermutacion(iteradorPadre)] = 1;
-                    iteradorHijo = (iteradorHijo + 1) % hijos[j].getTam();
-//                    System.out.println("Hey Listen!");
-                }
 
-                iteradorPadre = (iteradorPadre + 1) % padres[j].getTam();
+    
+    private void operadorOX(int corte1, int corte2){
+        int iteradorPadre, iteradorGenes, tam = padres[0].getTam();
+        boolean adjudicados[] = new boolean[tam];
+        int genes[] = new int[tam];
+        int cont;
+        for(int j=0; j<2; j++){
+            cont = 0;
+            for(int i=0; i<tam; i++){
+                adjudicados[i] = false;
+            }
+            for(int i=corte1; i<corte2; i++){
+                genes[i] = padres[j].getValorPermutacion(i);
+                adjudicados[genes[i]] = true;
+                cont++;
+            }
+            iteradorPadre = corte2;
+            iteradorGenes = corte2;
+            while(cont < tam){
+                if(!adjudicados[padres[(j+1)%2].getValorPermutacion(iteradorPadre)]){
+                    genes[iteradorGenes] = padres[(j+1)%2].getValorPermutacion(iteradorPadre);
+                    adjudicados[genes[iteradorGenes]] = true;
+                    iteradorGenes = (iteradorGenes + 1) % tam;
+                    cont++;
+                }
+                iteradorPadre = (iteradorPadre + 1) % tam;
+            }
+            for(int i=0; i<tam; i++){
+                hijos[j].setValorPermutacion(i, genes[i]);
             }
             hijos[j].Coste();
             numEvaluaciones++;
-            System.out.printf("GENERACION: " + numGeneracion + "\nHijo " + j + ": ");
-            for (int i = 0; i < poblacion.individuo(0).getTam(); i++) {
-                System.out.printf(" " + hijos[j].getValorPermutacion(i));
+        }
+        for(int j=0; j<2; j++){
+            System.out.print("Hijo "+j+": ");
+            for(int i=0; i<tam; i++){
+               System.out.print(hijos[j].getValorPermutacion(i)+" ");
             }
             System.out.println();
         }
     }
-    
-//    private void operadorOX(int corte1, int corte2) {
-//        int iteradorHijo = 0, iteradorPadre = 0;
-//        int[] dlb = new int[padres[0].getTam()];
-//            iteradorHijo = corte2;
-//            iteradorPadre = corte2;
-//            System.out.print("Padre" + 0 + ": ");
-//            for (int i = 0; i < padres[0].getTam(); i++) {
-//                System.out.print(" " + padres[0].getValorPermutacion(i));
-//            }
-//            System.out.println();
-//    
-//    
-//            for (int i = 0; i < dlb.length; i++) {
-//                dlb[i] = 0;
-//            }
-//            for (int i = corte1; i < corte2; i++) {
-//                hijos[0].setValorPermutacion(i, padres[0].getValorPermutacion(i));
-//                dlb[padres[0].getValorPermutacion(i)] = 1;
-////                cont++;
-//            }
-//            while (iteradorHijo != corte1) {
-//                System.out.print("Hijo: "+ iteradorHijo + "Padre: "+iteradorPadre+"DLB:");
-//            for(int i=0; i<dlb.length; i++){
-//               System.out.printf(" "+dlb[i]);
-//            }
-//            System.out.println();
-//                if (dlb[padres[1].getValorPermutacion(iteradorPadre)] == 0) {
-//                    hijos[0].setValorPermutacion(iteradorHijo, padres[1].getValorPermutacion(iteradorPadre));
-//                    dlb[padres[1].getValorPermutacion(iteradorPadre)] = 1;
-//                    iteradorHijo = (iteradorHijo + 1) % hijos[0].getTam();
-////                    System.out.println("Hey Listen!");
-//                }
-//
-//                iteradorPadre = (iteradorPadre + 1) % padres[0].getTam();
-//            }
-//            hijos[0].Coste();
-//            numEvaluaciones++;
-//            System.out.printf("GENERACION: " + numGeneracion + "\nHijo " + 0 + ": ");
-//            for (int i = 0; i < poblacion.individuo(0).getTam(); i++) {
-//                System.out.printf(" " + hijos[0].getValorPermutacion(i));
-//            }
-//            System.out.println();
-//        
-//        iteradorHijo = corte2;
-//            iteradorPadre = corte2;
-//            System.out.print("Padre" + 1 + ": ");
-//            for (int i = 0; i < padres[0].getTam(); i++) {
-//                System.out.print(" " + padres[1].getValorPermutacion(i));
-//            }
-//            System.out.println();
-//        
-//        
-//            for (int i = 0; i < dlb.length; i++) {
-//                dlb[i] = 0;
-//            }
-//            for (int i = corte1; i < corte2; i++) {
-//                hijos[1].setValorPermutacion(i, padres[1].getValorPermutacion(i));
-//                dlb[padres[1].getValorPermutacion(i)] = 1;
-////                cont++;
-//            }
-//            while (iteradorHijo != corte1) {
-//                System.out.print("Hijo: "+ iteradorHijo + "Padre: "+iteradorPadre+"DLB:");
-//            for(int i=0; i<dlb.length; i++){
-//               System.out.printf(" "+dlb[i]);
-//            }
-//            System.out.println();
-//                if (dlb[padres[0].getValorPermutacion(iteradorPadre)] == 0) {
-//                    hijos[1].setValorPermutacion(iteradorHijo, padres[0].getValorPermutacion(iteradorPadre));
-//                    dlb[padres[0].getValorPermutacion(iteradorPadre)] = 1;
-//                    iteradorHijo = (iteradorHijo + 1) % hijos[1].getTam();
-////                    System.out.println("Hey Listen!");
-//                }
-//
-//                iteradorPadre = (iteradorPadre + 1) % padres[1].getTam();
-//            }
-//            hijos[1].Coste();
-//            numEvaluaciones++;
-//            System.out.printf("GENERACION: " + numGeneracion + "\nHijo " + 1 + ": ");
-//            for (int i = 0; i < poblacion.individuo(0).getTam(); i++) {
-//                System.out.printf(" " + hijos[1].getValorPermutacion(i));
-//            }
-//            System.out.println();
-//    }
-    
-//    private void operadorOX(int corte1, int corte2){
-//        int[] dlb = new int[padres[0].getTam()];
-//        for(int i=0; i<padres[0].getTam(); i++){
-//            dlb[i] = 0;
-//        }
-//        for(int i=corte1; i<corte2; i++){
-//            
-//        }
-//        hijos[0]
-//    }
 
+
+    
     private void operadorPMX(int corte1, int corte2) {
-        System.out.printf("Corte 1: " + corte1 + ", Corte 2: " + corte2 + "\n");
-        int iteradorHijo = 0, iteradorPadre = 0;
-        int[] dlb = new int[padres[0].getTam()];
-        for (int j = 0; j < 2; j++) {
-            iteradorHijo = 0;
-            if(corte1 == 0){
-                iteradorHijo = corte2;
+        int iteradorPadre, iteradorGenes, tam = padres[0].getTam();
+        boolean adjudicados[] = new boolean[tam];
+        int genes[] = new int[tam];
+        int cont;
+        for(int j=0; j<2; j++){
+            cont = 0;
+            for(int i=0; i<tam; i++){
+                adjudicados[i] = false;
             }
-            iteradorPadre = iteradorHijo;
-            for (int i = 0; i < dlb.length; i++) {
-                dlb[i] = 0;
+            for(int i=corte1; i<corte2; i++){
+                genes[i] = padres[j].getValorPermutacion(i);
+                adjudicados[genes[i]] = true;
+                cont++;
+//                System.out.print(cont+"\n");
             }
-            
-            for (int i = corte1; i < corte2; i++) {
-                hijos[j].setValorPermutacion(i, padres[j].getValorPermutacion(i));
-                dlb[padres[j].getValorPermutacion(i)] = 1;
-            }
-            
-            while(iteradorHijo < hijos[j].getTam()){
-                System.out.print(iteradorHijo+"\n");
-                while(dlb[padres[(j + 1) % 2].getValorPermutacion(iteradorPadre)] != 0){
-                    System.out.print("Hijo: "+ iteradorHijo + "Padre: "+iteradorPadre+"DLB:");
-                    for(int i=0; i<dlb.length; i++){
-                       System.out.printf(" "+dlb[i]);
-                    }
-                    System.out.println();
-//                    System.out.print(iteradorPadre+"   ");
+            iteradorGenes = corte2;
+            iteradorPadre = corte2;
+            while(cont < tam){
+                while(adjudicados[padres[(j+1)%2].getValorPermutacion(iteradorPadre)]){
                     iteradorPadre = padres[j].getIndex(padres[(j + 1) % 2].getValorPermutacion(iteradorPadre));
-//                    System.out.print(iteradorPadre+"\n");
+                    System.out.print(iteradorPadre+"\n");
                 }
-                hijos[j].setValorPermutacion(iteradorHijo, padres[(j + 1) % 2].getValorPermutacion(iteradorPadre));
-                dlb[padres[(j + 1) % 2].getValorPermutacion(iteradorPadre)] = 1;
-                iteradorHijo++;
-                if(iteradorHijo == corte1){
-                    iteradorHijo = corte2;
-                }
-                iteradorPadre = iteradorHijo;
+                genes[iteradorGenes] = padres[(j + 1) % 2].getValorPermutacion(iteradorPadre);
+                adjudicados[genes[iteradorGenes]] = true;
+                iteradorGenes = (iteradorGenes + 1) % tam;
+                cont++;
+                iteradorPadre = iteradorGenes;
+//                System.out.print(cont+"\n");
+            }
+            for(int i=0; i<tam; i++){
+                hijos[j].setValorPermutacion(i, genes[i]);
             }
             hijos[j].Coste();
             numEvaluaciones++;
+        }
+        for(int j=0; j<2; j++){
+            System.out.print("Hijo "+j+": ");
+            for(int i=0; i<tam; i++){
+               System.out.print(hijos[j].getValorPermutacion(i)+" ");
+            }
+            System.out.println();
         }
     }
 
@@ -307,23 +209,14 @@ public class AGEstacionario {
 
     }
 
-    private void Reemplazamiento() {
-        Solucion tmp;
-        //Se coloca el mejor de los hijos en el indice 0 del vector hijos.
-        if (hijos[0].getCoste() > hijos[1].getCoste()) {
-            tmp = hijos[1];
-            hijos[1] = hijos[0];
-            hijos[0] = tmp;
-        }
-        //Se comprueba el mejor hijo con la peor solucion y se intercambia en caso de que lo mejore.
-        if (hijos[0].getCoste() < poblacion.individuo(poblacion.getTam() - 1).getCoste()) {
-            poblacion.reemplazarIndividuo(hijos[0], poblacion.getTam() - 1);
-            //A continuacion se hace lo propio con el segundo mejor hijo y la segunda mejor solucion.
-            if (hijos[1].getCoste() < poblacion.individuo(poblacion.getTam() - 2).getCoste()) {
-                poblacion.reemplazarIndividuo(hijos[1], poblacion.getTam() - 2);
+    private void Reemplazamiento() {     
+        for(int i=0; i<2; i++){
+            
+            if (hijos[i].getCoste() < poblacion.individuo(poblacion.getTam()-1).getCoste()) {
+                poblacion.reemplazarIndividuo(hijos[i], poblacion.getTam()-1);
+                poblacion.ordenarPoblacion();
             }
-        }//No es necesario comprobar el segundo mejor hijo con la pero solucion si el primero no la supera.
-        poblacion.ordenarPoblacion();
+        }
     }
 
     private void log(boolean PrimeraEscritura) {
@@ -337,6 +230,7 @@ public class AGEstacionario {
                 escribir.write(" " + poblacion.individuo(0).getValorPermutacion(i));
             }
             escribir.write("\n");
+            escribir.write("Coste: "+poblacion.individuo(0).getCoste()+"\n\n");
             escribir.close();
 
         } catch (Exception e) {
