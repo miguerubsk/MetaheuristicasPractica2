@@ -29,29 +29,49 @@ public class MetaheuristicasPractica2 {
             
             s = datos.readLine();
             String[] linea = s.split(" "); //Se obtiene la ruta al Fichero de Datos
-            Problema problema = new Problema(linea[1]);
+            String rutaDatos = linea[1];
+            Problema problema = new Problema(rutaDatos);
             
             s = datos.readLine();
             linea = s.split(" "); //Se obtiene la Semilla
             int sem = Integer.parseInt(linea[1]);
-            Poblacion poblacion = new Poblacion(TAM_POBLACION, sem, problema);
             
-            poblacion.ordenarPoblacion();
+            //Se obtiene una poblacion inicial aleatoria para el Algoritmo Genetico Estacionario.
+            Poblacion poblacionAGE = new Poblacion(TAM_POBLACION, sem, problema);
+            poblacionAGE.ordenarPoblacion();
             
+            //Se copia esa poblacion para el Algoritmo Genetico Generacional
+            Solucion[] aux = new Solucion[poblacionAGE.getTam()];
+                for(int i=0; i<poblacionAGE.getTam(); i++){
+                    aux[i] = new Solucion(poblacionAGE.individuo(i));
+                }
+            Poblacion poblacionAGG = new Poblacion(poblacionAGE, aux);
             problema.MostrarDatos();
-            for(int i=0; i<TAM_POBLACION; i++){
-                poblacion.individuo(i).MostrarSolucion();
-            }
             
             s = datos.readLine();
             linea = s.split(" "); //Se obtiene la Semilla
             String opCruce = linea[1];
-            AGEstacionario age = new AGEstacionario(poblacion, sem, opCruce, problema);
-            age.Ejecutar();
             
-            for(int i=0; i<TAM_POBLACION; i++){
-                age.individuo(i).MostrarSolucion();
-            }
+            long startTime1 = System.currentTimeMillis();
+            AGEstacionario age = new AGEstacionario(poblacionAGE, sem, opCruce, problema, rutaDatos);
+            age.Ejecutar();
+            long endTime1 = System.currentTimeMillis() - startTime1;
+
+            System.out.print("\n\nALGORIMO GENETICO ESTACIONARIO:\n");
+            age.mejorSolucion().MostrarSolucion();
+            System.out.println("\nTiempo de ejecucion Algoritmo Genetico Esatacionario: " + endTime1 + " ms.");
+            
+            System.out.print("___________________________________________\n");
+            
+            long startTime2 = System.currentTimeMillis();
+            AGGeneracional agg = new AGGeneracional(poblacionAGG, sem, opCruce, problema, rutaDatos);
+            agg.Ejecutar();
+            long endTime2 = System.currentTimeMillis() - startTime2;
+            
+            System.out.print("\n\nALGORIMO GENETICO GENERACIONAL:\n");
+            agg.mejorSolucion().MostrarSolucion();
+            System.out.println("\nTiempo de ejecucion Algoritmo Genetico Generacional: " + endTime2 + " ms.");
+            
         }catch(Exception e){
             System.err.printf(e.getMessage()+"\n");
         }

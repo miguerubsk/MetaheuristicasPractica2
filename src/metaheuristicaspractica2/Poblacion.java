@@ -5,6 +5,7 @@
  */
 package metaheuristicaspractica2;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -28,11 +29,20 @@ public class Poblacion {
         }
     }
     
+    //Constructor copia para sustituir las generaciones
+    public Poblacion(Poblacion p, Solucion[] s){
+        tam = p.tam;
+        individuos = new Solucion[tam];
+        semilla = p.semilla;
+        Random rand = new Random(semilla);
+        individuos = Arrays.copyOf(s, tam);
+    }
+    
     public Solucion individuo(int index){
         return individuos[index];
     }
     
-    //Reemplaza al individuo en la posicion "index" y devuelve el individuo reemplazado.
+    //Reemplaza al individuo en la posicion "index".
     public void reemplazarIndividuo(Solucion individuo, int index){
         individuos[index] = individuo;
     }
@@ -47,12 +57,13 @@ public class Poblacion {
     
     private void burbuja(){
     boolean fin=false;
+    Solucion aux;
         while(!fin){
             fin=true;
-            for(int i=1; i<tam; i++){
-                if(individuos[i-1].getCoste()>individuos[i].getCoste()){
-                    Solucion aux = individuos[i-1];
-                    individuos[i-1] = individuos[i];
+            for(int i=0; i<tam-1; i++){
+                if(individuos[i+1].getCoste()<individuos[i].getCoste()){
+                    aux = individuos[i+1];
+                    individuos[i+1] = individuos[i];
                     individuos[i] = aux;
                     fin = false;
                 }

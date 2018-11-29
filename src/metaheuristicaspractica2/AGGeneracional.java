@@ -11,10 +11,10 @@ import java.util.Random;
 
 /**
  *
- * @author macosx
+ * @author ROBERTO
  */
-public class AGEstacionario {
-
+public class AGGeneracional {
+    
     static final int MAX_EVALUACIONES = 50000;
     static final int MAX_GENERACIONES = 50000;
 
@@ -24,11 +24,12 @@ public class AGEstacionario {
     private Solucion[] padres;
     private Solucion[] hijos;
     private Solucion mejorSol;
+    private Poblacion nuevaGen;
     private int numEvaluaciones;
     private int numGeneracion;
     private String rutaLog;
-
-    public AGEstacionario(Poblacion _poblacion, int sem, String _cruce, Problema prob, String rutaDatos) {
+    
+    public AGGeneracional(Poblacion _poblacion, int sem, String _cruce, Problema prob, String rutaDatos) {
         poblacion = _poblacion;
         rand = new Random(sem);
         operadorCruce = _cruce;
@@ -41,25 +42,35 @@ public class AGEstacionario {
             hijos[i] = new Solucion(prob);
         }
         mejorSol = new Solucion(poblacion.individuo(0));
-        rutaLog = rutaDatos + "_Estacionario_" + operadorCruce + "_" + sem + ".log";
+        nuevaGen = new Poblacion(poblacion.getTam(), sem, prob);
+        rutaLog = rutaDatos + "_Generacional_" + operadorCruce + "_" + sem + ".log";
     }
-
+    
     public void Ejecutar() {
         while (numEvaluaciones < MAX_EVALUACIONES && numGeneracion < MAX_GENERACIONES) {
-            Seleccion();
-            Cruce();
-            Mutacion();
+            for(int i=0; i<poblacion.getTam()/2; i++){
+                Seleccion();
+                if(rand.nextFloat() < 0.7){
+                    Cruce();
+                    Mutacion();
+                    nuevaGen.reemplazarIndividuo(hijos[0], i*2);
+                    nuevaGen.reemplazarIndividuo(hijos[1], (i*2)+1);
+                }else{
+                    nuevaGen.reemplazarIndividuo(padres[0], i*2);
+                    nuevaGen.reemplazarIndividuo(padres[1], (i*2)+1);
+                }
+            }
+            nuevaGen.ordenarPoblacion();
             Reemplazamiento();
             numGeneracion++;
             if(mejorSol.getCoste()>poblacion.individuo(0).getCoste()){
                 mejorSol = new Solucion(poblacion.individuo(0));            
             }
             log(!(numGeneracion == 1)); //Si es la primera generacion, creara el fichero o lo sobreescribira si contiene datos de ejecuciones anteriores.           
-            
         }
         System.out.printf("Generacion final: %d\n", numGeneracion);
     }
-
+    
     private void Seleccion() {
         int[] val = new int[2];
         int seleccionado = -1;
@@ -133,7 +144,7 @@ public class AGEstacionario {
             }
             hijos[j].Coste();
             numEvaluaciones++;
-        }
+        }   
     }
     
     private void operadorPMX(int corte1, int corte2) {
@@ -170,7 +181,7 @@ public class AGEstacionario {
             numEvaluaciones++;
         }
     }
-
+    
     private void Mutacion() {
         int valor;
         for (int j = 0; j < 2; j++) {
@@ -187,31 +198,20 @@ public class AGEstacionario {
         }
 
     }
-
+    
     private void Reemplazamiento() {
-        Solucion tmp;
-        //Se coloca el mejor de los hijos en el indice 0 del vector hijos.
-        if (hijos[0].getCoste() > hijos[1].getCoste()) {
-            tmp = hijos[1];
-            hijos[1] = hijos[0];
-            hijos[0] = tmp;
-        }
-       
         Solucion[] aux = new Solucion[poblacion.getTam()];
         for(int i=0; i<poblacion.getTam(); i++){
-            aux[i] = new Solucion(poblacion.individuo(i));
+            aux[i] = new Solucion(nuevaGen.individuo(i));
         }
-        if(hijos[0].getCoste() < aux[poblacion.getTam()-1].getCoste()){
-            aux[poblacion.getTam()-1] = new Solucion(hijos[0]);
-            if(hijos[1].getCoste() < aux[poblacion.getTam()-2].getCoste()){
-                aux[poblacion.getTam()-2] = new Solucion(hijos[1]);
-            }
-        }
-        
+        //Se consigue la elite de 1 individuo
+         aux[poblacion.getTam()-1] = new Solucion(poblacion.individuo(0));
+         
+        //Se reemplaza la nueva generacion
         poblacion = new Poblacion(poblacion, aux);
         poblacion.ordenarPoblacion();
     }
-
+    
     private void log(boolean PrimeraEscritura) {
         try {
             File archivo = new File(rutaLog);
@@ -234,7 +234,7 @@ public class AGEstacionario {
     public Solucion individuo(int index) {
         return poblacion.individuo(index);
     }
-
+    
     public Solucion mejorSolucion() {
         return mejorSol;
     }

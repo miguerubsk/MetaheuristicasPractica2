@@ -35,7 +35,6 @@ public class Problema {
             //Obtencion del tamaño de la matriz.
             s = datos.readLine();
             String[] campos = s.split(" ");
-            System.out.printf("%s \n", campos[0]);
             tam = Integer.parseInt(campos[0]);
             
             matrizDatos = new int[tam][tam][2];
@@ -53,9 +52,7 @@ public class Problema {
                 campos = resultado.split(" ");
                 for(int j=0; j<tam; j++){
                     matrizDatos[i][j][FLUJOS] = Integer.parseInt(campos[j+1]);
-                    System.out.printf("%d ", matrizDatos[i][j][FLUJOS]);
                 }
-                System.out.printf("\n");
             }
             
             //Linea en blanco entre matrices en el fichero.
@@ -71,9 +68,7 @@ public class Problema {
                 campos = resultado.split(" ");
                 for(int j=0; j<tam; j++){
                     matrizDatos[i][j][DISTANCIAS] = Integer.parseInt(campos[j+1]);
-//                    System.out.printf("%d ", matrizDatos[i][j][DISTANCIAS]);
                 }
-//                System.out.printf("\n");
             }
             
             //Cierre del fichero.
