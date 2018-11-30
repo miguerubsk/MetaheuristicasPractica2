@@ -23,6 +23,7 @@ public class AGGeneracional {
     private String operadorCruce;
     private Solucion[] padres;
     private Solucion[] hijos;
+    private Solucion mejorSol;
     private Poblacion nuevaGen;
     private int numEvaluaciones;
     private int numGeneracion;
@@ -40,6 +41,7 @@ public class AGGeneracional {
             padres[i] = new Solucion(prob);
             hijos[i] = new Solucion(prob);
         }
+        mejorSol = new Solucion(poblacion.individuo(0));
         nuevaGen = new Poblacion(poblacion.getTam(), sem, prob);
         rutaLog = rutaDatos + "_Generacional_" + operadorCruce + "_" + sem + ".log";
     }
@@ -47,7 +49,7 @@ public class AGGeneracional {
     public void Ejecutar() {
         while (numEvaluaciones < MAX_EVALUACIONES && numGeneracion < MAX_GENERACIONES) {
             for(int i=0; i<poblacion.getTam()/2; i++){
-                Seleccion(i);
+                Seleccion();
                 if(rand.nextFloat() < 0.7){
                     Cruce();
                     Mutacion();
@@ -61,14 +63,32 @@ public class AGGeneracional {
             nuevaGen.ordenarPoblacion();
             Reemplazamiento();
             numGeneracion++;
+            if(mejorSol.getCoste()>poblacion.individuo(0).getCoste()){
+                mejorSol = new Solucion(poblacion.individuo(0));            
+            }
             log(!(numGeneracion == 1)); //Si es la primera generacion, creara el fichero o lo sobreescribira si contiene datos de ejecuciones anteriores.           
         }
         System.out.printf("Generacion final: %d\n", numGeneracion);
     }
     
-    private void Seleccion(int index) {
-        padres[0] = poblacion.individuo(index*2);
-        padres[1] = poblacion.individuo((index*2)+1);
+    private void Seleccion() {
+        int[] val = new int[2];
+        int seleccionado = -1;
+        for (int i = 0; i <= 1; i++) {
+            do {
+                val[0] = rand.nextInt(poblacion.getTam());
+            } while (val[0] == seleccionado);
+            do {
+                val[1] = rand.nextInt(poblacion.getTam());
+            } while (val[0] == val[1] || val[1] == seleccionado);
+            if (poblacion.individuo(val[0]).getCoste() < poblacion.individuo(val[1]).getCoste()) {
+                padres[i] = poblacion.individuo(val[0]);
+                seleccionado = val[0];
+            } else {
+                padres[i] = poblacion.individuo(val[1]);
+                seleccionado = val[1];
+            }
+        }
     }
 
     private void Cruce() {
@@ -82,7 +102,6 @@ public class AGGeneracional {
                 corte1 = corte2;
                 corte2 = tmp;
             }
-            System.out.printf("Corte 1: " + corte1 + ", Corte 2: " + corte2 + "\n");
         } while ((corte1 - corte2 >= poblacion.getTam() - 1) || (corte1 == corte2));
         switch (operadorCruce) {
             case "OX":
@@ -125,14 +144,7 @@ public class AGGeneracional {
             }
             hijos[j].Coste();
             numEvaluaciones++;
-        }
-        for(int j=0; j<2; j++){
-            System.out.print("Hijo "+j+": ");
-            for(int i=0; i<tam; i++){
-               System.out.print(hijos[j].getValorPermutacion(i)+" ");
-            }
-            System.out.println();
-        }
+        }   
     }
     
     private void operadorPMX(int corte1, int corte2) {
@@ -149,34 +161,24 @@ public class AGGeneracional {
                 genes[i] = padres[j].getValorPermutacion(i);
                 adjudicados[genes[i]] = true;
                 cont++;
-//                System.out.print(cont+"\n");
             }
             iteradorGenes = corte2;
             iteradorPadre = corte2;
             while(cont < tam){
                 while(adjudicados[padres[(j+1)%2].getValorPermutacion(iteradorPadre)]){
                     iteradorPadre = padres[j].getIndex(padres[(j + 1) % 2].getValorPermutacion(iteradorPadre));
-                    System.out.print(iteradorPadre+"\n");
                 }
                 genes[iteradorGenes] = padres[(j + 1) % 2].getValorPermutacion(iteradorPadre);
                 adjudicados[genes[iteradorGenes]] = true;
                 iteradorGenes = (iteradorGenes + 1) % tam;
                 cont++;
                 iteradorPadre = iteradorGenes;
-//                System.out.print(cont+"\n");
             }
             for(int i=0; i<tam; i++){
                 hijos[j].setValorPermutacion(i, genes[i]);
             }
             hijos[j].Coste();
             numEvaluaciones++;
-        }
-        for(int j=0; j<2; j++){
-            System.out.print("Hijo "+j+": ");
-            for(int i=0; i<tam; i++){
-               System.out.print(hijos[j].getValorPermutacion(i)+" ");
-            }
-            System.out.println();
         }
     }
     
@@ -198,11 +200,16 @@ public class AGGeneracional {
     }
     
     private void Reemplazamiento() {
+        Solucion[] aux = new Solucion[poblacion.getTam()];
+        for(int i=0; i<poblacion.getTam(); i++){
+            aux[i] = new Solucion(nuevaGen.individuo(i));
+        }
         //Se consigue la elite de 1 individuo
-        nuevaGen.reemplazarIndividuo(poblacion.individuo(0), nuevaGen.getTam()-1);
-        nuevaGen.ordenarPoblacion();
+         aux[poblacion.getTam()-1] = new Solucion(poblacion.individuo(0));
+         
         //Se reemplaza la nueva generacion
-        poblacion = nuevaGen;
+        poblacion = new Poblacion(poblacion, aux);
+        poblacion.ordenarPoblacion();
     }
     
     private void log(boolean PrimeraEscritura) {
@@ -212,11 +219,11 @@ public class AGGeneracional {
             FileWriter escribir = new FileWriter(archivo, PrimeraEscritura);
 
             escribir.write("GENERACION: " + numGeneracion + "\nMejor Solucion: ");
-            for (int i = 0; i < poblacion.individuo(0).getTam(); i++) {
-                escribir.write(" " + poblacion.individuo(0).getValorPermutacion(i));
+            for (int i = 0; i < mejorSol.getTam(); i++) {
+                escribir.write(" " + mejorSol.getValorPermutacion(i));
             }
             escribir.write("\n");
-            escribir.write("Coste: "+poblacion.individuo(0).getCoste()+"\n\n");
+            escribir.write("Coste: "+mejorSol.getCoste()+"\n\n");
             escribir.close();
 
         } catch (Exception e) {
@@ -228,4 +235,7 @@ public class AGGeneracional {
         return poblacion.individuo(index);
     }
     
+    public Solucion mejorSolucion() {
+        return mejorSol;
+    }
 }

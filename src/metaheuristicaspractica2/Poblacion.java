@@ -5,6 +5,7 @@
  */
 package metaheuristicaspractica2;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -26,6 +27,15 @@ public class Poblacion {
             individuos[i] = new Solucion(prob);
             individuos[i].GenerarAleatoria(rand);
         }
+    }
+    
+    //Constructor copia para sustituir las generaciones
+    public Poblacion(Poblacion p, Solucion[] s){
+        tam = p.tam;
+        individuos = new Solucion[tam];
+        semilla = p.semilla;
+        Random rand = new Random(semilla);
+        individuos = Arrays.copyOf(s, tam);
     }
     
     public Solucion individuo(int index){

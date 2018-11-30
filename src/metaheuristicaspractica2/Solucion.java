@@ -5,6 +5,7 @@
  */
 package metaheuristicaspractica2;
 
+import java.util.Arrays;
 import java.util.Random;
 import static metaheuristicaspractica2.Problema.DISTANCIAS;
 import static metaheuristicaspractica2.Problema.FLUJOS;
@@ -25,6 +26,12 @@ public class Solucion {
         tam = prob.getTam();
         permutacion = new int[tam];
         coste = 0;
+    }
+     public Solucion(Solucion s){
+        this.problema =s.problema;
+        this.tam = s.tam;
+        this.permutacion = Arrays.copyOf(s.permutacion, s.tam);
+        this.coste = s.coste;
     }
     
     public void GenerarAleatoria(Random rand){
@@ -101,7 +108,7 @@ public class Solucion {
         for(int i=0; i<tam; i++){
             System.out.printf("%d ",permutacion[i]);
         }
-        System.out.printf("Coste:  %d \n", coste);
+        System.out.printf("\nCoste:  %d \n", coste);
         System.out.printf("\n");
     }
     
