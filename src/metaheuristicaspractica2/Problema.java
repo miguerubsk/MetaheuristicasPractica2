@@ -68,9 +68,7 @@ public class Problema {
                 campos = resultado.split(" ");
                 for(int j=0; j<tam; j++){
                     matrizDatos[i][j][DISTANCIAS] = Integer.parseInt(campos[j+1]);
-//                    System.out.printf("%d ", matrizDatos[i][j][DISTANCIAS]);
                 }
-//                System.out.printf("\n");
             }
             
             //Cierre del fichero.
@@ -91,22 +89,22 @@ public class Problema {
         return tam;
     }
     
-//    public void MostrarDatos(){
-//        System.out.printf("Matriz de Flujos: \n\n");
-//        for(int i=0; i<tam; i++){
-//           for(int j=0; j<tam; j++){
-//                    System.out.printf("%d ", matrizDatos[i][j][FLUJOS]);
-//                }
-//                System.out.printf("\n");
-//        }
-//        System.out.printf("=========================================================\n");
-//        System.out.printf("Matriz de Distancias: \n\n");
-//        for(int i=0; i<tam; i++){
-//           for(int j=0; j<tam; j++){
-//                    System.out.printf("%d ", matrizDatos[i][j][DISTANCIAS]);
-//                }
-//                System.out.printf("\n");
-//        }
-//    }
+    public void MostrarDatos(){
+        System.out.printf("Matriz de Flujos: \n\n");
+        for(int i=0; i<tam; i++){
+           for(int j=0; j<tam; j++){
+                    System.out.printf("%d ", matrizDatos[i][j][FLUJOS]);
+                }
+                System.out.printf("\n");
+        }
+        System.out.printf("=========================================================\n");
+        System.out.printf("Matriz de Distancias: \n\n");
+        for(int i=0; i<tam; i++){
+           for(int j=0; j<tam; j++){
+                    System.out.printf("%d ", matrizDatos[i][j][DISTANCIAS]);
+                }
+                System.out.printf("\n");
+        }
+    }
         
 }

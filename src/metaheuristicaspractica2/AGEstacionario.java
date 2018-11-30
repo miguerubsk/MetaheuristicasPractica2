@@ -23,6 +23,7 @@ public class AGEstacionario {
     private String operadorCruce;
     private Solucion[] padres;
     private Solucion[] hijos;
+    private Solucion mejorSol;
     private int numEvaluaciones;
     private int numGeneracion;
     private String rutaLog;
@@ -39,6 +40,7 @@ public class AGEstacionario {
             padres[i] = new Solucion(prob);
             hijos[i] = new Solucion(prob);
         }
+        mejorSol = new Solucion(poblacion.individuo(0));
         rutaLog = rutaDatos + "_Estacionario_" + operadorCruce + "_" + sem + ".log";
     }
 
@@ -49,7 +51,11 @@ public class AGEstacionario {
             Mutacion();
             Reemplazamiento();
             numGeneracion++;
+            if(mejorSol.getCoste()>poblacion.individuo(0).getCoste()){
+                mejorSol = new Solucion(poblacion.individuo(0));            
+            }
             log(!(numGeneracion == 1)); //Si es la primera generacion, creara el fichero o lo sobreescribira si contiene datos de ejecuciones anteriores.           
+            
         }
         System.out.printf("Generacion final: %d\n", numGeneracion);
     }
@@ -71,7 +77,6 @@ public class AGEstacionario {
                 padres[i] = poblacion.individuo(val[1]);
                 seleccionado = val[1];
             }
-            System.out.println("Seleccionado: "+seleccionado+"\n");
         }
     }
 
@@ -86,7 +91,6 @@ public class AGEstacionario {
                 corte1 = corte2;
                 corte2 = tmp;
             }
-            System.out.printf("Corte 1: " + corte1 + ", Corte 2: " + corte2 + "\n");
         } while ((corte1 - corte2 >= poblacion.getTam() - 1) || (corte1 == corte2));
         switch (operadorCruce) {
             case "OX":
@@ -96,13 +100,7 @@ public class AGEstacionario {
                 operadorPMX(corte1, corte2);
                 break;
         }
-//        for (int i = 0; i < 2; i++) {
-//            hijos[i].Coste();
-//        }
-
     }
-
-
     
     private void operadorOX(int corte1, int corte2){
         int iteradorPadre, iteradorGenes, tam = padres[0].getTam();
@@ -136,16 +134,7 @@ public class AGEstacionario {
             hijos[j].Coste();
             numEvaluaciones++;
         }
-        for(int j=0; j<2; j++){
-            System.out.print("Hijo "+j+": ");
-            for(int i=0; i<tam; i++){
-               System.out.print(hijos[j].getValorPermutacion(i)+" ");
-            }
-            System.out.println();
-        }
     }
-
-
     
     private void operadorPMX(int corte1, int corte2) {
         int iteradorPadre, iteradorGenes, tam = padres[0].getTam();
@@ -161,34 +150,24 @@ public class AGEstacionario {
                 genes[i] = padres[j].getValorPermutacion(i);
                 adjudicados[genes[i]] = true;
                 cont++;
-//                System.out.print(cont+"\n");
             }
             iteradorGenes = corte2;
             iteradorPadre = corte2;
             while(cont < tam){
                 while(adjudicados[padres[(j+1)%2].getValorPermutacion(iteradorPadre)]){
                     iteradorPadre = padres[j].getIndex(padres[(j + 1) % 2].getValorPermutacion(iteradorPadre));
-                    System.out.print(iteradorPadre+"\n");
                 }
                 genes[iteradorGenes] = padres[(j + 1) % 2].getValorPermutacion(iteradorPadre);
                 adjudicados[genes[iteradorGenes]] = true;
                 iteradorGenes = (iteradorGenes + 1) % tam;
                 cont++;
                 iteradorPadre = iteradorGenes;
-//                System.out.print(cont+"\n");
             }
             for(int i=0; i<tam; i++){
                 hijos[j].setValorPermutacion(i, genes[i]);
             }
             hijos[j].Coste();
             numEvaluaciones++;
-        }
-        for(int j=0; j<2; j++){
-            System.out.print("Hijo "+j+": ");
-            for(int i=0; i<tam; i++){
-               System.out.print(hijos[j].getValorPermutacion(i)+" ");
-            }
-            System.out.println();
         }
     }
 
@@ -209,14 +188,28 @@ public class AGEstacionario {
 
     }
 
-    private void Reemplazamiento() {     
-        for(int i=0; i<2; i++){
-            
-            if (hijos[i].getCoste() < poblacion.individuo(poblacion.getTam()-1).getCoste()) {
-                poblacion.reemplazarIndividuo(hijos[i], poblacion.getTam()-1);
-                poblacion.ordenarPoblacion();
+    private void Reemplazamiento() {
+        Solucion tmp;
+        //Se coloca el mejor de los hijos en el indice 0 del vector hijos.
+        if (hijos[0].getCoste() > hijos[1].getCoste()) {
+            tmp = hijos[1];
+            hijos[1] = hijos[0];
+            hijos[0] = tmp;
+        }
+       
+        Solucion[] aux = new Solucion[poblacion.getTam()];
+        for(int i=0; i<poblacion.getTam(); i++){
+            aux[i] = new Solucion(poblacion.individuo(i));
+        }
+        if(hijos[0].getCoste() < aux[poblacion.getTam()-1].getCoste()){
+            aux[poblacion.getTam()-1] = new Solucion(hijos[0]);
+            if(hijos[1].getCoste() < aux[poblacion.getTam()-2].getCoste()){
+                aux[poblacion.getTam()-2] = new Solucion(hijos[1]);
             }
         }
+        
+        poblacion = new Poblacion(poblacion, aux);
+        poblacion.ordenarPoblacion();
     }
 
     private void log(boolean PrimeraEscritura) {
@@ -226,11 +219,11 @@ public class AGEstacionario {
             FileWriter escribir = new FileWriter(archivo, PrimeraEscritura);
 
             escribir.write("GENERACION: " + numGeneracion + "\nMejor Solucion: ");
-            for (int i = 0; i < poblacion.individuo(0).getTam(); i++) {
-                escribir.write(" " + poblacion.individuo(0).getValorPermutacion(i));
+            for (int i = 0; i < mejorSol.getTam(); i++) {
+                escribir.write(" " + mejorSol.getValorPermutacion(i));
             }
             escribir.write("\n");
-            escribir.write("Coste: "+poblacion.individuo(0).getCoste()+"\n\n");
+            escribir.write("Coste: "+mejorSol.getCoste()+"\n\n");
             escribir.close();
 
         } catch (Exception e) {
@@ -242,4 +235,7 @@ public class AGEstacionario {
         return poblacion.individuo(index);
     }
 
+    public Solucion mejorSolucion() {
+        return mejorSol;
+    }
 }
